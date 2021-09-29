@@ -16,26 +16,28 @@
 
 void CLK_ISO_init(void)
 {
-	TCA0.SPLIT.CTRLD = TCA_SPLIT_SPLITM_bm;//Enable Split mode 
-	TCA0.SPLIT.CTRLB = TCA_SPLIT_HCMP0EN_bm /* enable compare channel 	0 for the higher byte */
-					 | TCA_SPLIT_HCMP2EN_bm; /* enable compare channel 	2 for the higher byte */
-	/* set the PWM frequencies and duty cycles */	TCA0.SPLIT.HPER = 99; //PERIOD_VALUE_H;	TCA0.SPLIT.HCMP0 = 0x0; //DUTY_CYCLE_VALUE_H;	TCA0.SPLIT.HCMP2 = 0x0; //DUTY_CYCLE_VALUE_H;	TCA0.SPLIT.CTRLA = TCA_SPLIT_CLKSEL_DIV1_gc /* set clock source (sys_clk/1) */					
-					  |TCA_SPLIT_ENABLE_bm;/* start timer  Enable the peripheral */
+	/* set waveform output on PORT A */
+	TCA0.SINGLE.CTRLB = TCA_SINGLE_CMP0EN_bm /* enable compare channel 0 . Match between the counter value and the Compare 1 register.*/
+	| TCA_SINGLE_CMP2EN_bm /* enable compare channel 2 */
+	| TCA_SINGLE_WGMODE_DSBOTTOM_gc; /* set dual-slope PWM mode */
+
+	/* disable event counting */
+	TCA0.SINGLE.EVCTRL &= ~(TCA_SINGLE_CNTEI_bm);
+
+	/* set PWM frequency 400KHz*/
+	TCA0.SINGLE.PERBUF = 0x0C; /*buffer of the Period register*/
+	/*  duty cycle (50%) */
+	TCA0.SINGLE.CMP0BUF = (TCA0.SINGLE.PERBUF>>1)+1; //1010>>0101___10>>1=5 DUTY_CYCLE Shift right Symbol: >>
+	TCA0.SINGLE.CMP2BUF = (TCA0.SINGLE.PERBUF>>1)-1; //
+	
+	TCA0.SINGLE.CTRLA = TCA_SINGLE_CLKSEL_DIV1_gc /* set clock source (sys_clk/1) */
+	| TCA_SINGLE_ENABLE_bm; /* start timer */
 	
 	GPIO_DIR(0 + 3, 1);//port a 3, output
 	GPIO_DIR(0 + 2, 1);//port a 2, output
-	//PORTA.PIN3CTRL |= PORT_INVEN_bm; 
-	// w-r  (    , 0)   0=read  1=writ
-	// WO[n+3] Out
+ 
+		PORTA.PIN3CTRL = PORT_INVEN_bm;
 	
-	_delay_ms(1);
-	
-	while(TCA0.SPLIT.HCMP0 < (TCA0.SPLIT.HPER+1) >> 1)
-	{
-		TCA0.SPLIT.HCMP0++;
-		TCA0.SPLIT.HCMP2++;
-		_delay_ms(1);
-	}
 }
 
 int main(void)
@@ -47,7 +49,7 @@ int main(void)
 	CLKCTRL.MCLKCTRLB = 1;
 	/*END setting clock*/
 	
-	IO_update();
+	IO_init();
 	
 	CLK_ISO_init();
 		

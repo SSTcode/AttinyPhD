@@ -58,8 +58,8 @@ struct Outputs_struct Outputs;
 struct Inputs_struct Inputs;
 
 void IO_update(void){
-	GPIO_WRITE(0 + 2, Outputs.PWM_Supply_pos);//Port A pin 5, Outpu.bit_field
-	GPIO_WRITE(0 + 3, Outputs.PWM_Supply_neg);//Port A pin 7
+	GPIO_WRITE(0 + 3, Outputs.PWM_Supply_pos);//Port A pin 5, Outpu.bit_field
+	GPIO_WRITE(0 + 2, Outputs.PWM_Supply_neg);//Port A pin 7
 	
 
 }
@@ -70,8 +70,8 @@ void IO_init(void){
 
 	//GPIO_DIR(0 + 1, 1); //PA1 input	
 	
-	GPIO_DIR(0 + 2, 0); /* set pin 7 of PORT A as output */
-	GPIO_DIR(0 + 3, 0); /* set pin 5 of PORT A as output */
+	GPIO_DIR(0 + 3, 0); /* set pin 7 of PORT A as output */
+	GPIO_DIR(0 + 2, 0); /* set pin 5 of PORT A as output */
 	
 	
 
