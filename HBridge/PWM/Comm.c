@@ -58,36 +58,22 @@ struct Outputs_struct Outputs;
 struct Inputs_struct Inputs;
 
 void IO_update(void){
-	GPIO_WRITE(8 + 6, Outputs.RELAY_SS_BAT);
-	GPIO_WRITE(0 + 7, Outputs.RELAY_SS_12V);
-	GPIO_WRITE(16 + 4, Outputs.RELAY_BAT);
-	GPIO_WRITE(8 + 7, Outputs.RELAY_12V);
-	GPIO_WRITE(16 + 2, Outputs.LED3);
-	GPIO_WRITE(16 + 1, Outputs.LED2);
-	GPIO_WRITE(16 + 0, Outputs.LED1);
-	GPIO_WRITE(16 + 3, Outputs.FAN_ON);
+	GPIO_WRITE(0 + 2, Outputs.PWM_Supply_pos);//Port a 2, Outpu.bit_field
+	GPIO_WRITE(0 + 3, Outputs.PWM_Supply_neg);//Port a 3
 	
-	Inputs.ONOFF = GPIO_READ(8 + 0);
-	Inputs.BAT_PRESENT = GPIO_READ(8 + 4);
-	Inputs.BAT12V_PRESENT = GPIO_READ(8 + 5);
+
 }
 
 void IO_init(void){
 	*(uint8_t *)&Outputs = 0;
 	IO_update();
 
-	GPIO_DIR(8 + 0, 0);	
-	GPIO_DIR(8 + 4, 0);
-	GPIO_DIR(8 + 5, 0);
+	GPIO_DIR(0 + 1, 1); //PA1 input	
 
-	GPIO_DIR(8 + 6, 1);
-	GPIO_DIR(0 + 7, 1);
-	GPIO_DIR(16 + 4, 1);
-	GPIO_DIR(8 + 7, 1);
-	GPIO_DIR(16 + 2, 1);
-	GPIO_DIR(16 + 1, 1);
-	GPIO_DIR(16 + 0, 1);
-	GPIO_DIR(16 + 3, 1);
+	GPIO_DIR(0 + 2, 0);//PA2 out
+	GPIO_DIR(0 + 3, 0);//PA3 out
+	GPIO_DIR(0 + 7, 0);//PA7 out
+
 }
 
 void Comm_init(void)
@@ -100,18 +86,21 @@ void Comm_init(void)
 	USART0_CTRLA = USART_RXCIE_bm;
 	USART0_CTRLB = USART_TXEN_bm | USART_RXEN_bm | USART_RXMODE0_bm;
 
-	PORTB.OUTSET = PIN2_bm;	
-	PORTB.DIRSET = PIN2_bm;
+	//PORTB.OUTSET = PIN2_bm;	Not for attyni402
+	//PORTB.DIRSET = PIN2_bm;
 	
-	TCB0.CTRLA = TCB_ENABLE_bm;
-	TCB0.CTRLB = TCB_CNTMODE0_bm;
-	TCB0.CCMP = 200;
-	TCB0.INTCTRL = TCB_CAPT_bm;
+	//Timer/Counter Type B 
+	TCB0.CTRLA = TCB_ENABLE_bm; //Clock Select bit field 
+	TCB0.CTRLB = TCB_CNTMODE0_bm;//Periodic Interrupt mode 
+	TCB0.CCMP = 200;//register pair represents the 16-bit value 200= 1100 1000 in Hex200=001000000000 
+	TCB0.INTCTRL = TCB_CAPT_bm; //Capture Interrupt Enable 
 
-	TCB0.EVCTRL = TCB_CAPTEI_bm | TCB_EDGE_bm;
-	EVSYS.ASYNCUSER0 = 6;
-	EVSYS.ASYNCCH3 = 0;
-	EVSYS.ASYNCSTROBE = 1 << 3;
+	TCB0.EVCTRL = TCB_CAPTEI_bm | TCB_EDGE_bm; // Capture Event Input Enable and Edge negative 
+	
+	//Event System (EVSYS) enables direct peripheral-to-peripheral signaling 
+	EVSYS.ASYNCUSER0 = 6;	//Event System (EVSYS) enables direct peripheral-to-peripheral signaling 
+	//EVSYS.ASYNCCH3 = 0;  //Not attiny
+	EVSYS.ASYNCSTROBE = 1 << 3;	//Event System (EVSYS) enables direct peripheral-to-peripheral signaling 
 }
 
 uint8_t data_count_rx = 0;
@@ -119,14 +108,15 @@ uint8_t data_count_tx = 0;
 char data_rx[DATA_RX_LENGTH+2];
 char data_tx[DATA_TX_LENGTH+2];
 
-ISR(USART0_RXC_vect){
+/*  RX
+ISR(USART0_RXC_vect){//RX
 	TCB0.CNT = 0;
 	
 	if(data_count_rx >= DATA_RX_LENGTH+2) data_count_rx = DATA_RX_LENGTH + 1;
 	data_rx[data_count_rx++] = USART0.RXDATAL;
 }
 
-ISR(TCB0_INT_vect){
+ISR(TCB0_INT_vect){ //RX
 	TCB0.INTFLAGS = TCB_CAPT_bm;
 	
 	if(MdbCrc(data_rx, data_count_rx) == 0)
@@ -149,7 +139,7 @@ ISR(TCB0_INT_vect){
 	}
 
 	data_count_rx = 0;
-}
+}*/
 
 ISR(USART0_DRE_vect){
 	USART0.TXDATAL = data_tx[data_count_tx];

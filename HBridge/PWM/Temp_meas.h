@@ -1,9 +1,3 @@
-/*
- * Temp_meas.h
- *
- * Created: 25.04.2021 09:46:42
- *  Author: MrTea
- */ 
 
 
 #ifndef TEMP_MEAS_H_
@@ -13,9 +7,12 @@
 #include <stdlib.h>
 #include <math.h>
 
-extern int16_t Temps[4];
+extern int16_t Temps[1];
 
 void Temp_meas_init(void);
 void Temp_meas(void);
+
+
+
 
 #endif /* TEMP_MEAS_H_ */

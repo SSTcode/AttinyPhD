@@ -16,10 +16,13 @@
 
 void CLK_ISO_init(void)
 {
-	TCA0.SPLIT.CTRLD = TCA_SPLIT_SPLITM_bm;
+	TCA0.SPLIT.CTRLD = TCA_SPLIT_SPLITM_bm;//Enable Split mode 
 	TCA0.SPLIT.CTRLB = TCA_SPLIT_HCMP0EN_bm;
-	TCA0.SPLIT.HPER = 99;	TCA0.SPLIT.HCMP0 = 0x0;	TCA0.SPLIT.CTRLA = TCA_SPLIT_CLKSEL_DIV1_gc | TCA_SPLIT_ENABLE_bm;
-	GPIO_DIR(0 + 3, 1);
+	TCA0.SPLIT.HPER = 99;	TCA0.SPLIT.HCMP0 = 0x0;	TCA0.SPLIT.CTRLA = TCA_SPLIT_CLKSEL_DIV1_gc | TCA_SPLIT_ENABLE_bm;//Clock Select and Enable the peripheral 
+	
+	GPIO_DIR(0 + 3, 1);//port a 3, output
+	// w-r  (    , 0)   0=read  1=writ
+	// WO[n+3] Out
 	
 	_delay_ms(1);
 	
