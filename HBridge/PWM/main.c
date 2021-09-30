@@ -5,33 +5,44 @@
  * Created: 26/09/2019 16:12:28
  * Author : FRA
  */ 
-#define F_CPU 10000000
 
 #include <avr/io.h>                        /* Defines pins, ports, etc */
 #include <string.h>
-#include <util/delay.h>
 
 #include "Comm.h"
 #include "Temp_meas.h"
 
 void CLK_ISO_init(void)
 {
-	TCA0.SPLIT.CTRLD = TCA_SPLIT_SPLITM_bm;
-	TCA0.SPLIT.CTRLB = TCA_SPLIT_HCMP0EN_bm;
-	TCA0.SPLIT.HPER = 99;	TCA0.SPLIT.HCMP0 = 0x0;	TCA0.SPLIT.CTRLA = TCA_SPLIT_CLKSEL_DIV1_gc | TCA_SPLIT_ENABLE_bm;
-	GPIO_DIR(0 + 3, 1);
+	TCA0.SINGLE.CTRLA = TCA_SINGLE_CLKSEL_DIV1_gc /* set clock source (sys_clk/1) */
+	| TCA_SINGLE_ENABLE_bm; /* start timer */
 	
-	_delay_ms(1);
+	/* set waveform output on PORT A */
+	TCA0.SINGLE.CTRLB = TCA_SINGLE_CMP0EN_bm /* enable compare channel 0 . Match between the counter value and the Compare 1 register.*/
+	| TCA_SINGLE_CMP2EN_bm /* enable compare channel 2 */
+	| TCA_SINGLE_WGMODE_DSBOTTOM_gc; /* set dual-slope PWM mode */
+
+	/* disable event counting */
+	TCA0.SINGLE.EVCTRL &= ~(TCA_SINGLE_CNTEI_bm);
+
+	TCA0.SINGLE.PERBUF = 50; /*buffer of the Period register*/
+	TCA0.SINGLE.CMP0BUF = TCA0.SINGLE.PERBUF;
+	TCA0.SINGLE.CMP2BUF = 0;
+
+	PORTA.PIN3CTRL |= PORT_INVEN_bm;
+	PORTA.DIR |= PIN2_bm | PIN3_bm;
 	
-	while(TCA0.SPLIT.HCMP0 < (TCA0.SPLIT.HPER+1) >> 1)
+	while(TCA0.SINGLE.CMP0BUF > (TCA0.SINGLE.PERBUF>>1)+6)
 	{
-		TCA0.SPLIT.HCMP0++;
-		_delay_ms(1);
+		TCA0.SINGLE.CMP0BUF--;
+		TCA0.SINGLE.CMP2BUF++;
+		_delay_ms(10);
 	}
 }
 
 int main(void)
 {
+	cli();
 	/*setting clock*/
 	CPU_CCP = 0xD8; // CCP: Configuration Change Protection Un-protect protected I/O registers
 	CLKCTRL.MCLKCTRLA = CLKCTRL_CLKSEL_OSC20M_gc; // 16/20 MHz internal oscillator
@@ -50,13 +61,7 @@ int main(void)
     while (1)
     {
 		Temp_meas();
-		cli();
-		memcpy(valid_data_tx, Temps, 8);
-		sei();
-		if (TCB0.CNT > 7500)
-		{
-			*(uint8_t *)&Outputs = 0;
-			IO_update();
-		}
+		memcpy(valid_data_tx, &Temperature_int, 2);
+		Comm_send();
     }
 }

@@ -13,7 +13,7 @@
 #include <stdlib.h>
 #include <math.h>
 
-extern int16_t Temps[4];
+extern int16_t Temperature_int;
 
 void Temp_meas_init(void);
 void Temp_meas(void);

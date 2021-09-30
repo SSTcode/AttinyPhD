@@ -54,101 +54,38 @@ uint16_t MdbCrc (char *nData, uint8_t wLength)
 	return wCRCWord;
 }
 
-struct Outputs_struct Outputs;
-struct Inputs_struct Inputs;
-
-void IO_update(void){
-	GPIO_WRITE(8 + 6, Outputs.RELAY_SS_BAT);
-	GPIO_WRITE(0 + 7, Outputs.RELAY_SS_12V);
-	GPIO_WRITE(16 + 4, Outputs.RELAY_BAT);
-	GPIO_WRITE(8 + 7, Outputs.RELAY_12V);
-	GPIO_WRITE(16 + 2, Outputs.LED3);
-	GPIO_WRITE(16 + 1, Outputs.LED2);
-	GPIO_WRITE(16 + 0, Outputs.LED1);
-	GPIO_WRITE(16 + 3, Outputs.FAN_ON);
-	
-	Inputs.ONOFF = GPIO_READ(8 + 0);
-	Inputs.BAT_PRESENT = GPIO_READ(8 + 4);
-	Inputs.BAT12V_PRESENT = GPIO_READ(8 + 5);
-}
-
-void IO_init(void){
-	*(uint8_t *)&Outputs = 0;
-	IO_update();
-
-	GPIO_DIR(8 + 0, 0);	
-	GPIO_DIR(8 + 4, 0);
-	GPIO_DIR(8 + 5, 0);
-
-	GPIO_DIR(8 + 6, 1);
-	GPIO_DIR(0 + 7, 1);
-	GPIO_DIR(16 + 4, 1);
-	GPIO_DIR(8 + 7, 1);
-	GPIO_DIR(16 + 2, 1);
-	GPIO_DIR(16 + 1, 1);
-	GPIO_DIR(16 + 0, 1);
-	GPIO_DIR(16 + 3, 1);
-}
-
 void Comm_init(void)
-{
-	IO_init();
-	
+{	
 	USART0.BAUDL = 64;
 	USART0.BAUDH = 0;
 
-	USART0_CTRLA = USART_RXCIE_bm;
-	USART0_CTRLB = USART_TXEN_bm | USART_RXEN_bm | USART_RXMODE0_bm;
+	USART0_CTRLB = USART_TXEN_bm | USART_RXMODE0_bm;
 
-	PORTB.OUTSET = PIN2_bm;	
-	PORTB.DIRSET = PIN2_bm;
+	/*USART TXD as LUT input*/
+	CCL_LUT1CTRLB = CCL_INSEL1_USART0_gc;
 	
-	TCB0.CTRLA = TCB_ENABLE_bm;
-	TCB0.CTRLB = TCB_CNTMODE0_bm;
-	TCB0.CCMP = 200;
-	TCB0.INTCTRL = TCB_CAPT_bm;
+	/*XOR truth table*/
+	CCL.TRUTH1 = 0x99;
 
-	TCB0.EVCTRL = TCB_CAPTEI_bm | TCB_EDGE_bm;
-	EVSYS.ASYNCUSER0 = 6;
-	EVSYS.ASYNCCH3 = 0;
-	EVSYS.ASYNCSTROBE = 1 << 3;
+	CCL_LUT1CTRLA |= CCL_OUTEN_bm | CCL_ENABLE_bm | CCL_FILTSEL0_bm;
+	CCL_CTRLA     |= CCL_ENABLE_bm;
+	
+	PORTA.DIR |= PIN7_bm;	/* LUT1-OUT */
 }
 
-uint8_t data_count_rx = 0;
 uint8_t data_count_tx = 0;
-char data_rx[DATA_RX_LENGTH+2];
 char data_tx[DATA_TX_LENGTH+2];
 
-ISR(USART0_RXC_vect){
-	TCB0.CNT = 0;
+void Comm_send(void)
+{
+	while(USART0.CTRLA & USART_DREIE_bm);
 	
-	if(data_count_rx >= DATA_RX_LENGTH+2) data_count_rx = DATA_RX_LENGTH + 1;
-	data_rx[data_count_rx++] = USART0.RXDATAL;
-}
-
-ISR(TCB0_INT_vect){
-	TCB0.INTFLAGS = TCB_CAPT_bm;
-	
-	if(MdbCrc(data_rx, data_count_rx) == 0)
-	{
-		memcpy(valid_data_rx, data_rx, DATA_RX_LENGTH);
-		
-		*(uint8_t *)&Outputs = valid_data_rx[0];
-		
-		IO_update();
-
-		valid_data_tx[8] = *(uint8_t *)&Inputs;		
-		memcpy(data_tx, valid_data_tx, DATA_TX_LENGTH);
-					
-		uint16_t crc = MdbCrc(data_tx, DATA_TX_LENGTH);
-		data_tx[DATA_TX_LENGTH] = crc;
-		data_tx[DATA_TX_LENGTH+1] = crc >> 8;
-		data_count_tx = 0;
-		
-		USART0.CTRLA |= USART_DREIE_bm;
-	}
-
-	data_count_rx = 0;
+	memcpy(data_tx, valid_data_tx, DATA_TX_LENGTH);
+	uint16_t crc = MdbCrc(data_tx, DATA_TX_LENGTH);
+	data_tx[DATA_TX_LENGTH] = crc;
+	data_tx[DATA_TX_LENGTH+1] = crc >> 8;
+	data_count_tx = 0;
+	USART0.CTRLA |= USART_DREIE_bm;
 }
 
 ISR(USART0_DRE_vect){
