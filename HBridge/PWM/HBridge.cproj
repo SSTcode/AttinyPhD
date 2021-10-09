@@ -5,7 +5,7 @@
     <ProjectVersion>7.0</ProjectVersion>
     <ToolchainName>com.Atmel.AVRGCC8.C</ToolchainName>
     <ProjectGuid>dce6c7e3-ee26-4d79-826b-08594b9ad897</ProjectGuid>
-    <avrdevice>ATtiny817</avrdevice>
+    <avrdevice>ATtiny402</avrdevice>
     <avrdeviceseries>none</avrdeviceseries>
     <OutputType>Executable</OutputType>
     <Language>C</Language>
@@ -29,14 +29,14 @@
     <eraseonlaunchrule>0</eraseonlaunchrule>
     <EraseKey />
     <AsfFrameworkConfig>
-      <framework-data xmlns="">
+      <framework-data>
         <options />
         <configurations />
         <files />
         <documentation help="" />
         <offline-documentation help="" />
         <dependencies>
-          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.40.0" />
+          <content-extension eid="atmel.asf" uuidref="Atmel.ASF" version="3.42.0" />
         </dependencies>
       </framework-data>
     </AsfFrameworkConfig>
@@ -101,8 +101,8 @@
       </AcmeProjectConfig>
     </AcmeProjectConfig>
     <avrtool>com.atmel.avrdbg.tool.atmelice</avrtool>
-    <avrtoolserialnumber>J41800069269</avrtoolserialnumber>
-    <avrdeviceexpectedsignature>0x1E9320</avrdeviceexpectedsignature>
+    <avrtoolserialnumber>J41800113409</avrtoolserialnumber>
+    <avrdeviceexpectedsignature>0x1E9227</avrdeviceexpectedsignature>
     <avrtoolinterface>UPDI</avrtoolinterface>
     <com_atmel_avrdbg_tool_atmelice>
       <ToolOptions>
@@ -112,7 +112,7 @@
         <InterfaceName>UPDI</InterfaceName>
       </ToolOptions>
       <ToolType>com.atmel.avrdbg.tool.atmelice</ToolType>
-      <ToolNumber>J41800069269</ToolNumber>
+      <ToolNumber>J41800113409</ToolNumber>
       <ToolName>Atmel-ICE</ToolName>
     </com_atmel_avrdbg_tool_atmelice>
     <avrtoolinterfaceclock>500000</avrtoolinterfaceclock>
@@ -142,7 +142,7 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
     <ToolchainSettings>
       <AvrGcc>
-        <avrgcc.common.Device>-mmcu=attiny817 -B "%24(PackRepoDir)\atmel\ATtiny_DFP\1.3.229\gcc\dev\attiny817"</avrgcc.common.Device>
+        <avrgcc.common.Device>-mmcu=attiny402 -B "%24(PackRepoDir)\Atmel\ATtiny_DFP\1.9.337\gcc\dev\attiny402"</avrgcc.common.Device>
         <avrgcc.common.outputfiles.hex>True</avrgcc.common.outputfiles.hex>
         <avrgcc.common.outputfiles.lss>True</avrgcc.common.outputfiles.lss>
         <avrgcc.common.outputfiles.eep>True</avrgcc.common.outputfiles.eep>
@@ -163,7 +163,7 @@
             <Value>../utils</Value>
             <Value>../utils/assembler</Value>
             <Value>../</Value>
-            <Value>%24(PackRepoDir)\atmel\ATtiny_DFP\1.3.229\include</Value>
+            <Value>%24(PackRepoDir)\Atmel\ATtiny_DFP\1.9.337\include\</Value>
           </ListValues>
         </avrgcc.compiler.directories.IncludePaths>
         <avrgcc.compiler.optimization.level>Optimize for size (-Os)</avrgcc.compiler.optimization.level>
@@ -183,7 +183,7 @@
             <Value>../utils</Value>
             <Value>../utils/assembler</Value>
             <Value>../</Value>
-            <Value>%24(PackRepoDir)\atmel\ATtiny_DFP\1.3.229\include</Value>
+            <Value>%24(PackRepoDir)\Atmel\ATtiny_DFP\1.9.337\include\</Value>
           </ListValues>
         </avrgcc.assembler.general.IncludePaths>
       </AvrGcc>
@@ -192,7 +192,7 @@
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <ToolchainSettings>
       <AvrGcc>
-        <avrgcc.common.Device>-mmcu=attiny817 -B "%24(PackRepoDir)\atmel\ATtiny_DFP\1.3.229\gcc\dev\attiny817"</avrgcc.common.Device>
+        <avrgcc.common.Device>-mmcu=attiny402 -B "%24(PackRepoDir)\Atmel\ATtiny_DFP\1.9.337\gcc\dev\attiny402"</avrgcc.common.Device>
         <avrgcc.common.outputfiles.hex>True</avrgcc.common.outputfiles.hex>
         <avrgcc.common.outputfiles.lss>True</avrgcc.common.outputfiles.lss>
         <avrgcc.common.outputfiles.eep>True</avrgcc.common.outputfiles.eep>
@@ -213,7 +213,7 @@
             <Value>../utils</Value>
             <Value>../utils/assembler</Value>
             <Value>../</Value>
-            <Value>%24(PackRepoDir)\atmel\ATtiny_DFP\1.3.229\include</Value>
+            <Value>%24(PackRepoDir)\Atmel\ATtiny_DFP\1.9.337\include\</Value>
           </ListValues>
         </avrgcc.compiler.directories.IncludePaths>
         <avrgcc.compiler.optimization.level>Optimize (-O1)</avrgcc.compiler.optimization.level>
@@ -234,7 +234,7 @@
             <Value>../utils</Value>
             <Value>../utils/assembler</Value>
             <Value>../</Value>
-            <Value>%24(PackRepoDir)\atmel\ATtiny_DFP\1.3.229\include</Value>
+            <Value>%24(PackRepoDir)\Atmel\ATtiny_DFP\1.9.337\include\</Value>
           </ListValues>
         </avrgcc.assembler.general.IncludePaths>
         <avrgcc.assembler.debugging.DebugLevel>Default (-Wa,-g)</avrgcc.assembler.debugging.DebugLevel>

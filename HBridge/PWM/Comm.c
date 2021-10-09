@@ -71,6 +71,7 @@ void Comm_init(void)
 	CCL_CTRLA     |= CCL_ENABLE_bm;
 	
 	PORTA.DIR |= PIN7_bm;	/* LUT1-OUT */
+	PORTA.PIN7CTRL |= PORT_INVEN_bm;
 }
 
 uint8_t data_count_tx = 0;

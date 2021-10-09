@@ -14,8 +14,7 @@
 
 void CLK_ISO_init(void)
 {
-	TCA0.SINGLE.CTRLA = TCA_SINGLE_CLKSEL_DIV1_gc /* set clock source (sys_clk/1) */
-	| TCA_SINGLE_ENABLE_bm; /* start timer */
+
 	
 	/* set waveform output on PORT A */
 	TCA0.SINGLE.CTRLB = TCA_SINGLE_CMP0EN_bm /* enable compare channel 0 . Match between the counter value and the Compare 1 register.*/
@@ -25,12 +24,18 @@ void CLK_ISO_init(void)
 	/* disable event counting */
 	TCA0.SINGLE.EVCTRL &= ~(TCA_SINGLE_CNTEI_bm);
 
-	TCA0.SINGLE.PERBUF = 50; /*buffer of the Period register*/
-	TCA0.SINGLE.CMP0BUF = TCA0.SINGLE.PERBUF;
-	TCA0.SINGLE.CMP2BUF = 0;
-
-	PORTA.PIN3CTRL |= PORT_INVEN_bm;
+	/* set PWM frequency 400KHz*/
+	TCA0.SINGLE.PERBUF = 0x0C; /*buffer of the Period register*/
+	/*  duty cycle (50%) */
+	TCA0.SINGLE.CMP0BUF = (TCA0.SINGLE.PERBUF>>1)+1; //1010>>0101___10>>1=5 DUTY_CYCLE Shift right Symbol: >>
+	TCA0.SINGLE.CMP2BUF = (TCA0.SINGLE.PERBUF>>1)-1; //
+	
+		TCA0.SINGLE.CTRLA = TCA_SINGLE_CLKSEL_DIV1_gc /* set clock source (sys_clk/1) */
+		| TCA_SINGLE_ENABLE_bm; /* start timer */
+	
 	PORTA.DIR |= PIN2_bm | PIN3_bm;
+	PORTA.PIN3CTRL |= PORT_INVEN_bm;
+
 	
 	while(TCA0.SINGLE.CMP0BUF > (TCA0.SINGLE.PERBUF>>1)+6)
 	{
